@@ -1,0 +1,73 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity sensor_personas is
+    Port (
+        clk              : in STD_LOGIC;
+        reset            : in STD_LOGIC;
+        persona_entra    : in STD_LOGIC;
+        persona_sale     : in STD_LOGIC;
+        num_personas     : out INTEGER;
+        alarma_personas  : out STD_LOGIC;
+        habilitar_ascensor : out STD_LOGIC;
+        energia_ok       : in STD_LOGIC;
+        alarma_visual    : out STD_LOGIC;
+        alarma_sonora    : out STD_LOGIC
+    );
+end sensor_personas;
+
+architecture Behavioral of sensor_personas is
+    signal contador : INTEGER := 0;
+	 -- Componente de Alarmas
+    component alarmas
+        Port (
+            energia_ok       : in STD_LOGIC;
+            alarma_personas  : in STD_LOGIC;
+            alarma_visual    : out STD_LOGIC;
+            alarma_sonora    : out STD_LOGIC
+        );
+    end component;
+
+begin
+
+    -- Proceso para contar personas
+    process(clk, reset)
+    begin
+        if reset = '1' then
+            contador <= 0;
+        elsif rising_edge(clk) then
+            if persona_entra = '1' and contador < 10 then
+                contador <= contador + 1;
+            elsif persona_sale = '1' and contador > 0 then
+                contador <= contador - 1;
+            end if;
+        end if;
+    end process;
+-- Salida de cantidad de personas
+    num_personas <= contador;
+    
+    -- Condición de alarma por sobrecarga
+    process(contador)
+    begin
+        if contador > 10 then
+            alarma_personas <= '1';  -- Se activa la alarma
+            habilitar_ascensor <= '0';  -- El ascensor se bloquea
+        else
+            alarma_personas <= '0';  -- Se apaga la alarma
+            habilitar_ascensor <= '1';  -- El ascensor puede funcionar
+        end if;
+    end process;
+
+    -- Instancia del bloque de alarmas
+    alarmas_inst : alarmas
+    port map (
+        energia_ok      => energia_ok,
+        alarma_personas => alarma_personas,
+        alarma_visual   => alarma_visual,
+        alarma_sonora   => alarma_sonora
+    );
+
+end Behavioral;
+

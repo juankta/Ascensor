@@ -1,0 +1,39 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity control_luces is
+    Port (
+        clk              : in  STD_LOGIC;
+        reset            : in  STD_LOGIC;
+        personas_dentro  : in  STD_LOGIC;
+        puerta_abierta   : in  STD_LOGIC;
+        puerta_cerrada   : in  STD_LOGIC;
+        luz_principal    : out STD_LOGIC;
+        luz_advertencia  : out STD_LOGIC
+    );
+end control_luces;
+
+architecture Behavioral of control_luces is
+begin
+    process(clk, reset)
+    begin
+        if reset = '1' then
+            luz_principal   <= '0';
+            luz_advertencia <= '0';
+        elsif rising_edge(clk) then
+            -- Luz principal encendida si hay personas dentro, apagada si no hay
+            if personas_dentro = '1' then
+                luz_principal <= '1';
+            else
+                luz_principal <= '0';
+            end if;
+
+            -- Luz de advertencia encendida cuando la puerta está en movimiento
+            if puerta_abierta = '0' and puerta_cerrada = '0' then
+                luz_advertencia <= '1';  -- La puerta está en movimiento
+            else
+                luz_advertencia <= '0';  -- La puerta está en un estado estable
+            end if;
+        end if;
+    end process;
+end Behavioral;

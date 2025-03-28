@@ -1,0 +1,46 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity control_puertas is
+    Port (
+        clk               : in STD_LOGIC;
+        reset             : in STD_LOGIC;
+        habilitar_ascensor: in STD_LOGIC;
+        llegada_piso      : in STD_LOGIC;
+        boton_abrir       : in STD_LOGIC;
+        boton_cerrar      : in STD_LOGIC;
+        puerta_abierta    : out STD_LOGIC;
+        puerta_cerrada    : out STD_LOGIC;
+        alarma_puerta     : out STD_LOGIC
+    );
+end control_puertas;
+
+architecture Behavioral of control_puertas is
+    signal estado_puerta : STD_LOGIC := '0';
+begin
+
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if reset = '1' then
+                estado_puerta <= '0';
+                alarma_puerta <= '1';
+            elsif habilitar_ascensor = '0' then
+                estado_puerta <= '0';
+                alarma_puerta <= '1';
+            else
+                alarma_puerta <= '0';
+
+                if llegada_piso = '1' then
+                    estado_puerta <= '1';
+                elsif boton_cerrar = '1' then
+                    estado_puerta <= '0';
+                end if;
+            end if;
+        end if;
+    end process;
+
+    puerta_abierta <= estado_puerta;
+    puerta_cerrada <= not estado_puerta;
+
+end Behavioral;

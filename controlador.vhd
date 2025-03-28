@@ -1,0 +1,72 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity controlador is
+    Port (
+        clk               : in  STD_LOGIC;
+        reset             : in  STD_LOGIC;
+        enable            : in  STD_LOGIC;
+        solicitud_pisos   : in  STD_LOGIC_VECTOR(4 downto 0);
+        solicitud_abrir   : in  STD_LOGIC;
+        solicitud_cerrar  : in  STD_LOGIC;
+        solicitud_subir   : in  STD_LOGIC_VECTOR(4 downto 0);
+        solicitud_bajar   : in  STD_LOGIC_VECTOR(4 downto 0);
+        piso_actual       : in  STD_LOGIC_VECTOR(2 downto 0);
+        puerta_abierta    : in  STD_LOGIC;
+        puerta_cerrada    : in  STD_LOGIC;
+        piso_destino      : out STD_LOGIC_VECTOR(2 downto 0);
+        dir               : out STD_LOGIC;
+        request_valid     : out STD_LOGIC;
+        llegada_piso      : out STD_LOGIC;
+        habilitar_ascensor : out STD_LOGIC
+    );
+end controlador;
+
+architecture arch_controlador of controlador is
+    signal piso_int : INTEGER range 0 to 4 := 0;
+    signal activo   : STD_LOGIC := '0';
+begin
+    process(clk, reset)
+    begin
+        if reset = '1' then
+            piso_int          <= 0;
+            activo            <= '0';
+            request_valid     <= '0';
+            habilitar_ascensor <= '0';
+        elsif rising_edge(clk) then
+            if enable = '1' then
+                -- Revisión de solicitudes de pisos
+                for i in 0 to 4 loop
+                    if solicitud_pisos(i) = '1' then
+                        piso_int <= i;
+                        activo   <= '1';
+                    end if;
+                end loop;
+
+                -- Dirección del ascensor
+                if to_integer(unsigned(piso_actual)) < piso_int then
+                    dir <= '1';
+                elsif to_integer(unsigned(piso_actual)) > piso_int then
+                    dir <= '0';
+                else
+                    activo <= '0';
+                end if;
+            end if;
+
+            -- Si ya llegamos, detener el ascensor
+            if to_integer(unsigned(piso_actual)) = piso_int then
+                request_valid     <= '1';
+                llegada_piso      <= '1';
+                habilitar_ascensor <= '0';
+            else
+                request_valid     <= '0';
+                llegada_piso      <= '0';
+                habilitar_ascensor <= '1';
+            end if;
+        end if;
+    end process;
+
+    piso_destino <= std_logic_vector(to_unsigned(piso_int, 3));
+
+end arch_controlador;

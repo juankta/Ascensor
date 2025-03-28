@@ -1,0 +1,210 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity elevador_top is
+    port (
+        clk              : in std_logic;   -- Reloj del sistema
+        reset            : in std_logic;   -- Reset general
+        boton_subir      : in std_logic_vector(4 downto 0);  -- Botones de subida
+        boton_bajar      : in std_logic_vector(4 downto 0);  -- Botones de bajada
+        boton_piso       : in std_logic_vector(4 downto 0);  -- Botones dentro de la cabina
+        boton_abrir      : in std_logic;   -- Botón manual para abrir la puerta
+        boton_cerrar     : in std_logic;   -- Botón manual para cerrar la puerta
+        sensor_personas  : in std_logic;   -- Sensor de personas dentro del ascensor
+        energia_fallo    : in std_logic;   -- Señal de fallo de energía
+        display_piso     : out std_logic_vector(6 downto 0); -- Display de 7 segmentos
+        luces           : out std_logic;   -- Estado de luces
+        alarma_personas  : out std_logic;  -- Alarma por exceso de personas
+        alarma_puerta    : out std_logic;  -- Alarma por puerta abierta en fallo
+        alarma_fallo     : out std_logic   -- Alarma por fallo de energía
+    );
+end elevador_top;
+
+architecture Behavioral of elevador_top is
+
+    -- Sección de señales internas
+    signal piso_actual : std_logic_vector(2 downto 0);  
+    signal puertas_abiertas : std_logic;
+    signal cantidad_personas : std_logic_vector(3 downto 0);
+    signal movimiento : std_logic_vector(1 downto 0);  -- 00: parado, 01: subiendo, 10: bajando
+    
+    -- Declaración de componentes
+    component sensor_personas is
+        port (
+            clk        : in std_logic;
+            sensor     : in std_logic;
+            cantidad   : out std_logic_vector(3 downto 0);
+            alarma     : out std_logic
+        );
+    end component;
+
+    component cabina is
+        port (
+            clk           : in std_logic;
+            reset         : in std_logic;
+            boton_piso    : in std_logic_vector(4 downto 0);
+            piso_actual   : out std_logic_vector(2 downto 0)
+        );
+    end component;
+
+    component alarma is
+        port (
+            alarma_personas : in std_logic;
+            alarma_puerta   : in std_logic;
+            alarma_fallo    : in std_logic;
+            salida_alarma   : out std_logic
+        );
+    end component;
+
+    component control_puertas is
+        port (
+            clk             : in std_logic;
+            reset           : in std_logic;
+            boton_abrir     : in std_logic;
+            boton_cerrar    : in std_logic;
+            puertas_abiertas : out std_logic
+        );
+    end component;
+
+    component ordenpisos is
+        port (
+            boton_subir  : in std_logic_vector(4 downto 0);
+            boton_bajar  : in std_logic_vector(4 downto 0);
+            piso_actual  : in std_logic_vector(2 downto 0);
+            orden        : out std_logic_vector(4 downto 0)
+        );
+    end component;
+
+    component control_luces is
+        port (
+            movimiento : in std_logic_vector(1 downto 0);
+            luces      : out std_logic
+        );
+    end component;
+
+    component display_7seg is
+        port (
+            piso_actual : in std_logic_vector(2 downto 0);
+            display_piso : out std_logic_vector(6 downto 0)
+        );
+    end component;
+
+    component controlador is
+        port (
+            clk        : in std_logic;
+            reset      : in std_logic;
+            orden      : in std_logic_vector(4 downto 0);
+            movimiento : out std_logic_vector(1 downto 0)
+        );
+    end component;
+
+    component controlador_vertical is
+        port (
+            clk         : in std_logic;
+            reset       : in std_logic;
+            movimiento  : in std_logic_vector(1 downto 0);
+            piso_actual : out std_logic_vector(2 downto 0)
+        );
+    end component;
+
+    component divisorF is
+        port (
+            clk     : in std_logic;
+            clk_out : out std_logic
+        );
+    end component;
+
+    -- Señal interna para el divisor de frecuencia
+    signal clk_div : std_logic;
+
+begin
+    -- Instanciación de módulos y conexiones
+
+    -- Módulo de sensor de personas
+    sensor_inst : sensor_personas
+        port map (
+            clk        => clk,
+            sensor     => sensor_personas,
+            cantidad   => cantidad_personas,
+            alarma     => alarma_personas
+        );
+
+    -- Módulo de la cabina
+    cabina_inst : cabina
+        port map (
+            clk        => clk,
+            reset      => reset,
+            boton_piso => boton_piso,
+            piso_actual => piso_actual
+        );
+
+    -- Módulo de alarma
+    alarma_inst : alarma
+        port map (
+            alarma_personas => alarma_personas,
+            alarma_puerta   => alarma_puerta,
+            alarma_fallo    => alarma_fallo,
+            salida_alarma   => open
+        );
+
+    -- Módulo de control de puertas
+    puertas_inst : control_puertas
+        port map (
+            clk            => clk,
+            reset          => reset,
+            boton_abrir    => boton_abrir,
+            boton_cerrar   => boton_cerrar,
+            puertas_abiertas => puertas_abiertas
+        );
+
+    -- Módulo de orden de pisos
+    orden_inst : ordenpisos
+        port map (
+            boton_subir  => boton_subir,
+            boton_bajar  => boton_bajar,
+            piso_actual  => piso_actual,
+            orden        => open -- Se conecta con el controlador
+        );
+
+    -- Módulo de control de luces
+    luces_inst : control_luces
+        port map (
+            movimiento => movimiento,
+            luces      => luces
+        );
+
+    -- Módulo de display de 7 segmentos
+    display_inst : display_7seg
+        port map (
+            piso_actual  => piso_actual,
+            display_piso => display_piso
+        );
+
+    -- Módulo de controlador
+    controlador_inst : controlador
+        port map (
+            clk        => clk,
+            reset      => reset,
+            orden      => open,
+            movimiento => movimiento
+        );
+
+    -- Módulo de control vertical
+    vertical_inst : controlador_vertical
+        port map (
+            clk         => clk,
+            reset       => reset,
+            movimiento  => movimiento,
+            piso_actual => piso_actual
+        );
+
+    -- Módulo de divisor de frecuencia
+    divisor_inst : divisorF
+        port map (
+            clk     => clk,
+            clk_out => clk_div
+        );
+
+end Behavioral;

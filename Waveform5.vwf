@@ -72,6 +72,16 @@ SIGNAL("boton_bajar")
 	PARENT = "";
 }
 
+SIGNAL("alarma_personas")
+{
+	VALUE_TYPE = NINE_LEVEL_BIT;
+	SIGNAL_TYPE = SINGLE_BIT;
+	WIDTH = 1;
+	LSB_INDEX = -1;
+	DIRECTION = OUTPUT;
+	PARENT = "";
+}
+
 SIGNAL("cantidad_personas")
 {
 	VALUE_TYPE = NINE_LEVEL_BIT;
@@ -122,16 +132,6 @@ SIGNAL("cantidad_personas[0]")
 	PARENT = "cantidad_personas";
 }
 
-SIGNAL("alarma_personas")
-{
-	VALUE_TYPE = NINE_LEVEL_BIT;
-	SIGNAL_TYPE = SINGLE_BIT;
-	WIDTH = 1;
-	LSB_INDEX = -1;
-	DIRECTION = OUTPUT;
-	PARENT = "";
-}
-
 TRANSITION_LIST("clk")
 {
 	NODE
@@ -153,10 +153,11 @@ TRANSITION_LIST("reset")
 		REPEAT = 1;
 		NODE
 		{
-			REPEAT = 25;
+			REPEAT = 1;
 			LEVEL 0 FOR 20.0;
 			LEVEL 1 FOR 20.0;
 		}
+		LEVEL 0 FOR 960.0;
 	}
 }
 
@@ -167,19 +168,11 @@ TRANSITION_LIST("boton_subir")
 		REPEAT = 1;
 		NODE
 		{
-			REPEAT = 2;
+			REPEAT = 12;
 			LEVEL 0 FOR 40.0;
 			LEVEL 1 FOR 40.0;
 		}
-		LEVEL 0 FOR 120.0;
-		LEVEL 1 FOR 40.0;
-		NODE
-		{
-			REPEAT = 1;
-			LEVEL 0 FOR 40.0;
-			LEVEL 1 FOR 40.0;
-		}
-		LEVEL 0 FOR 600.0;
+		LEVEL 0 FOR 40.0;
 	}
 }
 
@@ -188,9 +181,16 @@ TRANSITION_LIST("boton_bajar")
 	NODE
 	{
 		REPEAT = 1;
-		LEVEL 0 FOR 200.0;
-		LEVEL 1 FOR 40.0;
-		LEVEL 0 FOR 760.0;
+		LEVEL 0 FOR 1000.0;
+	}
+}
+
+TRANSITION_LIST("alarma_personas")
+{
+	NODE
+	{
+		REPEAT = 1;
+		LEVEL X FOR 1000.0;
 	}
 }
 
@@ -222,15 +222,6 @@ TRANSITION_LIST("cantidad_personas[1]")
 }
 
 TRANSITION_LIST("cantidad_personas[0]")
-{
-	NODE
-	{
-		REPEAT = 1;
-		LEVEL X FOR 1000.0;
-	}
-}
-
-TRANSITION_LIST("alarma_personas")
 {
 	NODE
 	{
@@ -279,7 +270,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "cantidad_personas";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Binary;
+	RADIX = Unsigned;
 	TREE_INDEX = 4;
 	TREE_LEVEL = 0;
 	CHILDREN = 5, 6, 7, 8;
@@ -289,7 +280,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "cantidad_personas[3]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Binary;
+	RADIX = Unsigned;
 	TREE_INDEX = 5;
 	TREE_LEVEL = 1;
 	PARENT = 4;
@@ -299,7 +290,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "cantidad_personas[2]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Binary;
+	RADIX = Unsigned;
 	TREE_INDEX = 6;
 	TREE_LEVEL = 1;
 	PARENT = 4;
@@ -309,7 +300,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "cantidad_personas[1]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Binary;
+	RADIX = Unsigned;
 	TREE_INDEX = 7;
 	TREE_LEVEL = 1;
 	PARENT = 4;
@@ -319,7 +310,7 @@ DISPLAY_LINE
 {
 	CHANNEL = "cantidad_personas[0]";
 	EXPAND_STATUS = COLLAPSED;
-	RADIX = Binary;
+	RADIX = Unsigned;
 	TREE_INDEX = 8;
 	TREE_LEVEL = 1;
 	PARENT = 4;
