@@ -1,0 +1,29 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity alarma is
+    Port (
+        clk               : in  STD_LOGIC;
+        reset             : in  STD_LOGIC;
+        alarma_personas   : in  STD_LOGIC;
+        habilitar_ascensor: in  STD_LOGIC;
+        alarma_sonora     : out STD_LOGIC;
+        alarma_visual     : out STD_LOGIC
+    );
+end alarma;
+
+architecture Behavioral of alarma is
+begin
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if reset = '1' or alarma_personas = '1' then
+                alarma_sonora <= '1';
+                alarma_visual <= '1';
+            else
+                alarma_sonora <= '0';
+                alarma_visual <= '0';
+            end if;
+        end if;
+    end process;
+end Behavioral;

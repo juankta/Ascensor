@@ -1,0 +1,271 @@
+// Copyright (C) 1991-2013 Altera Corporation
+// Your use of Altera Corporation's design tools, logic functions 
+// and other software and tools, and its AMPP partner logic 
+// functions, and any output files from any of the foregoing 
+// (including device programming or simulation files), and any 
+// associated documentation or information are expressly subject 
+// to the terms and conditions of the Altera Program License 
+// Subscription Agreement, Altera MegaCore Function License 
+// Agreement, or other applicable license agreement, including, 
+// without limitation, that your use is for the sole purpose of 
+// programming logic devices manufactured by Altera and sold by 
+// Altera or its authorized distributors.  Please refer to the 
+// applicable agreement for further details.
+
+// *****************************************************************************
+// This file contains a Verilog test bench with test vectors .The test vectors  
+// are exported from a vector file in the Quartus Waveform Editor and apply to  
+// the top level entity of the current Quartus project .The user can use this   
+// testbench to simulate his design using a third-party simulation tool .       
+// *****************************************************************************
+// Generated on "03/27/2025 22:33:37"
+                                                                        
+// Verilog Self-Checking Test Bench (with test vectors) for design :    alarma
+// 
+// Simulation tool : 3rd Party
+// 
+
+`timescale 1 ps/ 1 ps
+module alarma_vlg_sample_tst(
+	alarma_personas,
+	clk,
+	reset,
+	sampler_tx
+);
+input  alarma_personas;
+input  clk;
+input  reset;
+output sampler_tx;
+
+reg sample;
+time current_time;
+always @(alarma_personas or clk or reset)
+                                                                                
+begin                                                 
+ if ($realtime > 0)                                   
+ begin                                                
+	if ($realtime == 0 || $realtime != current_time)  
+	begin									          
+		if (sample === 1'bx)                          
+			sample = 0;                               
+		else                                          
+			sample = ~sample;                         
+	end										          
+	current_time = $realtime;					      
+ end                                                  
+end                                                   
+
+assign sampler_tx = sample;
+endmodule
+
+module alarma_vlg_check_tst (
+	alarma_sonora,
+	alarma_visual,
+	buzzer,
+	sampler_rx
+);
+input  alarma_sonora;
+input  alarma_visual;
+input  buzzer;
+input sampler_rx;
+
+reg  alarma_sonora_expected;
+reg  alarma_visual_expected;
+reg  buzzer_expected;
+
+reg  alarma_sonora_prev;
+reg  alarma_visual_prev;
+reg  buzzer_prev;
+
+reg  alarma_sonora_expected_prev;
+reg  alarma_visual_expected_prev;
+reg  buzzer_expected_prev;
+
+reg  last_alarma_sonora_exp;
+reg  last_alarma_visual_exp;
+reg  last_buzzer_exp;
+
+reg trigger;
+
+integer i;
+integer nummismatches;
+
+reg [1:3] on_first_change ;
+
+
+initial
+begin
+trigger = 0;
+i = 0;
+nummismatches = 0;
+on_first_change = 3'b1;
+end
+
+// update real /o prevs
+
+always @(trigger)
+begin
+	alarma_sonora_prev = alarma_sonora;
+	alarma_visual_prev = alarma_visual;
+	buzzer_prev = buzzer;
+end
+
+// update expected /o prevs
+
+always @(trigger)
+begin
+	alarma_sonora_expected_prev = alarma_sonora_expected;
+	alarma_visual_expected_prev = alarma_visual_expected;
+	buzzer_expected_prev = buzzer_expected;
+end
+
+
+
+// expected alarma_sonora
+initial
+begin
+	alarma_sonora_expected = 1'bX;
+end 
+
+// expected alarma_visual
+initial
+begin
+	alarma_visual_expected = 1'bX;
+end 
+
+// expected buzzer
+initial
+begin
+	buzzer_expected = 1'bX;
+end 
+// generate trigger
+always @(alarma_sonora_expected or alarma_sonora or alarma_visual_expected or alarma_visual or buzzer_expected or buzzer)
+begin
+	trigger <= ~trigger;
+end
+
+always @(posedge sampler_rx or negedge sampler_rx)
+begin
+`ifdef debug_tbench
+	$display("Scanning pattern %d @time = %t",i,$realtime );
+	i = i + 1;
+	$display("| expected alarma_sonora = %b | expected alarma_visual = %b | expected buzzer = %b | ",alarma_sonora_expected_prev,alarma_visual_expected_prev,buzzer_expected_prev);
+	$display("| real alarma_sonora = %b | real alarma_visual = %b | real buzzer = %b | ",alarma_sonora_prev,alarma_visual_prev,buzzer_prev);
+`endif
+	if (
+		( alarma_sonora_expected_prev !== 1'bx ) && ( alarma_sonora_prev !== alarma_sonora_expected_prev )
+		&& ((alarma_sonora_expected_prev !== last_alarma_sonora_exp) ||
+			on_first_change[1])
+	)
+	begin
+		$display ("ERROR! Vector Mismatch for output port alarma_sonora :: @time = %t",  $realtime);
+		$display ("     Expected value = %b", alarma_sonora_expected_prev);
+		$display ("     Real value = %b", alarma_sonora_prev);
+		nummismatches = nummismatches + 1;
+		on_first_change[1] = 1'b0;
+		last_alarma_sonora_exp = alarma_sonora_expected_prev;
+	end
+	if (
+		( alarma_visual_expected_prev !== 1'bx ) && ( alarma_visual_prev !== alarma_visual_expected_prev )
+		&& ((alarma_visual_expected_prev !== last_alarma_visual_exp) ||
+			on_first_change[2])
+	)
+	begin
+		$display ("ERROR! Vector Mismatch for output port alarma_visual :: @time = %t",  $realtime);
+		$display ("     Expected value = %b", alarma_visual_expected_prev);
+		$display ("     Real value = %b", alarma_visual_prev);
+		nummismatches = nummismatches + 1;
+		on_first_change[2] = 1'b0;
+		last_alarma_visual_exp = alarma_visual_expected_prev;
+	end
+	if (
+		( buzzer_expected_prev !== 1'bx ) && ( buzzer_prev !== buzzer_expected_prev )
+		&& ((buzzer_expected_prev !== last_buzzer_exp) ||
+			on_first_change[3])
+	)
+	begin
+		$display ("ERROR! Vector Mismatch for output port buzzer :: @time = %t",  $realtime);
+		$display ("     Expected value = %b", buzzer_expected_prev);
+		$display ("     Real value = %b", buzzer_prev);
+		nummismatches = nummismatches + 1;
+		on_first_change[3] = 1'b0;
+		last_buzzer_exp = buzzer_expected_prev;
+	end
+
+	trigger <= ~trigger;
+end
+initial 
+
+begin 
+$timeformat(-12,3," ps",6);
+#1000000;
+if (nummismatches > 0)
+	$display ("%d mismatched vectors : Simulation failed !",nummismatches);
+else
+	$display ("Simulation passed !");
+$finish;
+end 
+endmodule
+
+module alarma_vlg_vec_tst();
+// constants                                           
+// general purpose registers
+reg alarma_personas;
+reg clk;
+reg reset;
+// wires                                               
+wire alarma_sonora;
+wire alarma_visual;
+wire buzzer;
+
+wire sampler;                             
+
+// assign statements (if any)                          
+alarma i1 (
+// port map - connection between master ports and signals/registers   
+	.alarma_personas(alarma_personas),
+	.alarma_sonora(alarma_sonora),
+	.alarma_visual(alarma_visual),
+	.buzzer(buzzer),
+	.clk(clk),
+	.reset(reset)
+);
+
+// clk
+always
+begin
+	clk = 1'b0;
+	clk = #10000 1'b1;
+	#10000;
+end 
+
+// reset
+initial
+begin
+	reset = 1'b0;
+	reset = #20000 1'b1;
+	reset = #20000 1'b0;
+	reset = #950000 1'b1;
+end 
+
+// alarma_personas
+initial
+begin
+	alarma_personas = 1'b0;
+end 
+
+alarma_vlg_sample_tst tb_sample (
+	.alarma_personas(alarma_personas),
+	.clk(clk),
+	.reset(reset),
+	.sampler_tx(sampler)
+);
+
+alarma_vlg_check_tst tb_out(
+	.alarma_sonora(alarma_sonora),
+	.alarma_visual(alarma_visual),
+	.buzzer(buzzer),
+	.sampler_rx(sampler)
+);
+endmodule
+
